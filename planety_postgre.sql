@@ -8,10 +8,8 @@ DROP TABLE IF EXISTS public."Objev" CASCADE;
 DROP TABLE IF EXISTS public."Prvky" CASCADE;
 DROP TABLE IF EXISTS public."Slouceniny" CASCADE;
 DROP TABLE IF EXISTS public."Slozeni" CASCADE;
-DROP SEQUENCE IF EXISTS vzdalenost_id_vzd_seq;
 
-CREATE TABLE IF NOT EXISTS public."Typy_hvezd"
-(
+CREATE TABLE IF NOT EXISTS public."Typy_hvezd"(
     id_hve integer NOT NULL,
     typ character varying(30) COLLATE pg_catalog."default" NOT NULL,
     spektralni_trida character(1) COLLATE pg_catalog."default" NOT NULL,
@@ -20,17 +18,15 @@ CREATE TABLE IF NOT EXISTS public."Typy_hvezd"
     "zastoupeni_(%)" double precision,
     "zivotnost_(mil._let)" integer,
     CONSTRAINT "Typy_hvezd_pkey" PRIMARY KEY (id_hve)
-)
+);
 
-CREATE TABLE IF NOT EXISTS public."Typy_planet"
-(
+CREATE TABLE IF NOT EXISTS public."Typy_planet"(
     id_pla integer NOT NULL,
     typ character varying(30) COLLATE pg_catalog."default" NOT NULL,
     CONSTRAINT "Typy_planet_pkey" PRIMARY KEY (id_pla)
-)
+);
 
-CREATE TABLE IF NOT EXISTS public."Typ_telesa"
-(
+CREATE TABLE IF NOT EXISTS public."Typ_telesa"(
     id_typ integer NOT NULL,
     nazev character varying(20) COLLATE pg_catalog."default" NOT NULL,
     id_hve integer,
@@ -42,17 +38,16 @@ CREATE TABLE IF NOT EXISTS public."Typ_telesa"
     CONSTRAINT fk_typ_pla FOREIGN KEY (id_pla)
         REFERENCES public."Typy_planet" (id_pla) MATCH SIMPLE
         ON DELETE CASCADE
-)
+);
 
-CREATE TABLE IF NOT EXISTS public."Teleso"
-(
+CREATE TABLE IF NOT EXISTS public."Teleso"(
     id_tel integer NOT NULL,
-    nazev character varying(25) COLLATE pg_catalog."default" NOT NULL,
+    nazev character varying(25) COLLATE pg_catalog."default" UNIQUE NOT NULL,
     symbol character varying(5) COLLATE pg_catalog."default",
     id_typ_tel integer NOT NULL,
     "prumer_(km)" real NOT NULL,
     "hmotnost_(kg)" real NOT NULL,
-    "hustota_(g/cm^(3))" real NOT NULL,
+    "hustota_(g/cm^(3))" real,
     "gravitace_(m/s^(2))" real NOT NULL,
     "min_teplota_(K)" integer,
     "prum_teplota_(K)" integer,
@@ -71,24 +66,27 @@ CREATE TABLE IF NOT EXISTS public."Teleso"
     CONSTRAINT fk_typ_tel FOREIGN KEY (id_typ_tel)
         REFERENCES public."Typ_telesa" (id_typ) MATCH SIMPLE
         ON DELETE CASCADE
-)
+);
 
-CREATE TABLE IF NOT EXISTS public."Vzdalenost"
-(
+CREATE TABLE IF NOT EXISTS public."Vzdalenost"(
     id_vzd integer NOT NULL,
     "vzd_od_zeme_(AU)" real,
     "vzd_od_slunce_min_(AU)" real,
     "vzd_od_slunce_max_(AU)" real,
     id_tel integer NOT NULL,
-    CONSTRAINT "Vzdalenost_pkey" PRIMARY KEY (id_vzd)
-)
+    CONSTRAINT "Vzdalenost_pkey" PRIMARY KEY (id_vzd),
+    CONSTRAINT fk_id_pla FOREIGN KEY (id_tel)
+        REFERENCES public."Teleso" (id_tel) MATCH SIMPLE
+        ON DELETE CASCADE
+);
 
+
+DROP SEQUENCE IF EXISTS vzdalenost_id_vzd_seq;
 CREATE SEQUENCE vzdalenost_id_vzd_seq;
 ALTER TABLE "Vzdalenost"
 ALTER COLUMN id_vzd SET DEFAULT nextval('vzdalenost_id_vzd_seq');
 
-CREATE TABLE IF NOT EXISTS public."Objevitel"
-(
+CREATE TABLE IF NOT EXISTS public."Objevitel"(
     id_jme integer NOT NULL,
     jmeno character varying(15) COLLATE pg_catalog."default" NOT NULL,
     prijmeni character varying(15) COLLATE pg_catalog."default" NOT NULL,
@@ -98,10 +96,9 @@ CREATE TABLE IF NOT EXISTS public."Objevitel"
     puvod character varying(20) COLLATE pg_catalog."default" NOT NULL,
     CONSTRAINT "Objevitel_pkey" PRIMARY KEY (id_jme),
     CONSTRAINT date_check CHECK (datum_narozeni > '1400-01-01'::date)
-)
+);
 
-CREATE TABLE IF NOT EXISTS public."Objev"
-(
+CREATE TABLE IF NOT EXISTS public."Objev"(
     id_obj integer NOT NULL,
     datum_objevu date,
     objevitel character varying(30) COLLATE pg_catalog."default" NOT NULL,
@@ -114,10 +111,9 @@ CREATE TABLE IF NOT EXISTS public."Objev"
     CONSTRAINT fk_planeta FOREIGN KEY (id_pla)
         REFERENCES public."Teleso" (id_tel) MATCH SIMPLE
         ON DELETE CASCADE
-)
+);
 
-CREATE TABLE IF NOT EXISTS public."Prvky"
-(
+CREATE TABLE IF NOT EXISTS public."Prvky"(
     id_prv integer NOT NULL,
     nazev character varying(20) COLLATE pg_catalog."default" NOT NULL,
     zkratka character varying(2) COLLATE pg_catalog."default" NOT NULL,
@@ -126,10 +122,9 @@ CREATE TABLE IF NOT EXISTS public."Prvky"
     elektronegativita real,
     skupina character varying(3) COLLATE pg_catalog."default" NOT NULL,
     CONSTRAINT "Prvky_pkey" PRIMARY KEY (id_prv)
-)
+);
 
-CREATE TABLE IF NOT EXISTS public."Slouceniny"
-(
+CREATE TABLE IF NOT EXISTS public."Slouceniny"(
     id_slouc integer NOT NULL,
     nazev character varying(25) COLLATE pg_catalog."default" NOT NULL,
     zkratka character varying(6) COLLATE pg_catalog."default" NOT NULL,
@@ -144,10 +139,9 @@ CREATE TABLE IF NOT EXISTS public."Slouceniny"
     CONSTRAINT fk_prv2 FOREIGN KEY (id_prv2)
         REFERENCES public."Prvky" (id_prv) MATCH SIMPLE
         ON DELETE CASCADE
-)
+);
 
-CREATE TABLE IF NOT EXISTS public."Slozeni"
-(
+CREATE TABLE IF NOT EXISTS public."Slozeni"(
     id_pla integer NOT NULL,
     id_prv integer,
     id_slouc integer,
@@ -161,7 +155,7 @@ CREATE TABLE IF NOT EXISTS public."Slozeni"
     CONSTRAINT id_pla_sloz FOREIGN KEY (id_pla)
         REFERENCES public."Teleso" (id_tel) MATCH SIMPLE
         ON DELETE CASCADE
-)
+);
 
 INSERT INTO "Typy_hvezd" VALUES
 (1,'Červená hvězda','M','červená',3200,80,200000),
