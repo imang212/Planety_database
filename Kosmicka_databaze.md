@@ -59,7 +59,7 @@ __SELECT s hiearchií SELF_JOIN__
 with recursive dedicnost_planet as(
   select t.id_pla, t.id_tel, t.nazev 
   from "Teleso" t 
-  where id_mat_hve is not null
+  where id_pla is not null
   union 
   select t.id_pla, t.id_tel, t.nazev 
   from "Teleso" t 
