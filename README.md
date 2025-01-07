@@ -34,7 +34,7 @@ FROM (
     SELECT COUNT(*) AS pocet_zaznamu FROM public."Typy_planet"
     UNION ALL
     SELECT COUNT(*) AS pocet_zaznamu FROM public."Vzdalenost"
-)
+) --vyšlo mi 28
 ```
 __SELECT s vnořeným selectem__
 ```sql
