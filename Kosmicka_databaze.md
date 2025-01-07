@@ -11,7 +11,7 @@ __Načtení databáze__
 Databázi si můžeme načíst pomocí nahraného souboru **"planety_postgre.sql"**. Stačí zkopírovat kód do Postgresql databáze, spustit ho jako celek a potom by se měla objevit ve Vaší databázi. Tento kód funguje pouze pro postgresql databázi.   
 
 ### Příkazy
-A teď se pojďme podívat na příkazy, které jsem udělal v rámci seminární práce na RDBS(Relační databázové systémy).
+A teď se pojďme podívat na příkazy, které jsem udělal v rámci seminární práce na předmět RDBS(Relační databázové systémy).
 
 __SELECT pro výpočet průměrné počtu záznamů na tabulku__
 ```sql
@@ -67,14 +67,16 @@ ORDER BY t3.id_pla asc
 ```
 __View__
 ```sql
-SELECT t3.typ AS "typ planety",
-t3.id_pla as "ID typu planety",
-t1.nazev AS "název", 
-t1.id_tel as "ID planety"
-FROM ("Teleso" t1 JOIN "Typ_telesa" t2 ON t1.id_typ_tel = t2.id_typ) 
-LEFT JOIN "Typy_planet" t3 ON t2.id_pla = t3.id_pla
-WHERE t3.id_pla IS NOT NULL
-ORDER BY t3.id_pla asc
+CREATE OR REPLACE VIEW Telesa_view AS
+SELECT t1.nazev AS "název tělesa", t1.symbol AS "symbol tělesa", 
+CONCAT(t1."hmotnost_(kg)",' kg') AS "hmotnost tělesa", 
+CONCAT(ROUND(t1."prumer_(km)"::numeric,0),' km') AS "průměr tělesa",  
+t2.objevitel AS "Kdo objevil", t3.nazev AS "typ tělesa", 
+CONCAT_WS(' ',t5.typ,t4.typ) AS "druh" 
+FROM ("Teleso" t1 JOIN "Objev" t2 ON t1.id_tel = t2.id_pla JOIN "Typ_telesa" t3 ON t1.id_typ_tel = t3.id_typ) 
+LEFT JOIN "Typy_planet" t4 ON t3.id_pla = t4.id_pla
+LEFT JOIN "Typy_hvezd" t5 ON t3.id_hve = t5.id_hve
+ORDER BY id_tel;
 ```
 __INDEX__
 
