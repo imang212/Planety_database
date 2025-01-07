@@ -38,9 +38,9 @@ FROM (
 ```
 __SELECT s vnořeným selectem__
 ```sql
-select nazev as "Název tělesa", 1 + (select count(*) from "Teleso" where "hmotnost_(kg)" > t."hmotnost_(kg)") as "Pořadí největší hmotnost" 
+select nazev as "Název tělesa", 1 + (select count(*) from "Teleso" where "hmotnost_(kg)" > t."hmotnost_(kg)") as "Pořadí největší hmotnosti" 
 from "Teleso" t
-order by "Pořadí největší hmotnost";
+order by "Pořadí největší hmotnosti";
 ```
 __SELECT s analytickou funkcí__
 ```sql
