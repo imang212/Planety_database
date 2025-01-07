@@ -2,7 +2,7 @@
 
 __Model databáze__
 
-![planety_navrh](https://github.com/user-attachments/assets/2ae8bc05-f7a2-4de1-8096-5cc0ec586f2b)
+![postgres - public](https://github.com/user-attachments/assets/c59531e7-c6d6-439e-b75b-8f1fd7d49c5b)
 
 __Načtení databáze__
 
