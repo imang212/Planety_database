@@ -56,14 +56,16 @@ limit 4
 ```
 __SELECT s hiearchií SELF_JOIN__
 ```sql
-SELECT t3.typ AS "typ planety",
-t3.id_pla as "ID typu planety",
-t1.nazev AS "název", 
-t1.id_tel as "ID planety"
-FROM ("Teleso" t1 JOIN "Typ_telesa" t2 ON t1.id_typ_tel = t2.id_typ) 
-LEFT JOIN "Typy_planet" t3 ON t2.id_pla = t3.id_pla
-WHERE t3.id_pla IS NOT NULL
-ORDER BY t3.id_pla asc
+with recursive dedicnost_planet as(
+  select t.id_pla, t.id_tel, t.nazev 
+  from "Teleso" t 
+  where id_mat_hve is not null
+  union 
+  select t.id_pla, t.id_tel, t.nazev 
+  from "Teleso" t 
+  inner join dedicnost_planet d on d.id_pla = t.id_tel
+)
+select * from dedicnost_planet order by id_pla ASC;
 ```
 __View__
 ```sql
