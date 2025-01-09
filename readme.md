@@ -325,14 +325,15 @@ GRANT selecting_role TO patricek;
 ```
 Přidělování práv.
 ```sql
-GRANT ALL PRIVILEGES ON TABLE "Teleso","teleso_action" TO selecting_role;
+GRANT select, insert, UPDATE ON TABLE "Teleso","teleso_action" TO selecting_role;
 GRANT USAGE, SELECT ON SEQUENCE teleso_action_id_seq TO selecting_role;
 ```
 Odebírání práv.
 ```sql
 REVOKE ALL PRIVILEGES ON TABLE "Teleso","teleso_action" FROM selecting_role;
-REVOKE ALL PRIVILEGES ON DATABASE postgres FROM patricek;
 REVOKE USAGE, CREATE ON SCHEMA public FROM selecting_role;
+REVOKE USAGE, SELECT ON SEQUENCE teleso_action_id_seq FROM selecting_role;
+REVOKE ALL PRIVILEGES ON DATABASE postgres FROM patricek;
 ```
 Smazání uživatele a role.
 ```sql
