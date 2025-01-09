@@ -155,8 +155,8 @@ __Procedura__
 
 Zde mám proceduru, která nám vrátí tabulku s typy, názvy a gravitací jednotlivých těles.
 ```sql
-create or replace function Vrat_gravitaci(min_gravitace numeric, max_gravitace numeric) 
-RETURNS void AS $$
+create or replace procedure Vrat_gravitaci(min_gravitace numeric, max_gravitace numeric) 
+AS $$
 DECLARE
   p_cursor CURSOR FOR SELECT t2.nazev AS typ_planety, t1.nazev, t1."gravitace_(m/s^(2))" AS gravitace 
       FROM "Teleso" t1 LEFT join "Typ_telesa" t2 ON t1.id_typ_tel = t2.id_typ 
@@ -191,10 +191,16 @@ END;
 $$ language plpgsql;
 ```
 ```sql
-select Vrat_gravitaci(0,2); --nejdřív tělesa, která mají gravitaci od 0 do 2 m/S
+BEGIN;
+CALL Vrat_gravitaci(0,2); --nejdřív tělesa, která mají gravitaci od 0 do 2 m/S
+ROLLBACK; -- při chybě zavolám rollback
+COMMIT;
 ```
 ```sql
-select Vrat_gravitaci(20,1000); -- potom tělesa, která mají vyšší gravitaci než 20 m/s
+BEGIN;
+CALL Vrat_gravitaci(20,1000); -- potom tělesa, která mají vyšší gravitaci než 20 m/s
+ROLLBACK; -- při chybě zavolám rollback
+COMMIT;
 ```
 __Trigger__
 
