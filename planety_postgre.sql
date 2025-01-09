@@ -208,7 +208,7 @@ INSERT INTO "Teleso" VALUES
 (32, 'Ceres', '⚳', 13, 952, 9.5*POWER(10,20), 2.077, 0.27, null, null, null, 17.9, 1680,1,null),
 (33, 'Eris',null, 11, 2326, 1.6466*POWER(10,22), 2.43, 0.082, 30, 42, 56, 3.434, 2041999, 1, null),
 (34, 'Proxima Centauri',null,8, 0.104*POWER(10,6)*2, 0.24*POWER(10,30), 56.8, 5.20, null, null, 2992, 22.204, 89.8,null,null),
-(35, 'Halleyova kometa',null,14, 11, 2.2*POWER(10,14),0.6,0,null,null,null,null,27283,null,1);
+(35, 'Halleyova kometa',null,14, 11, 2.2*POWER(10,14),0.6,0,null,null,null,null,27283,1,null);
 
 INSERT INTO "Vzdalenost" ("vzd_od_zeme_(AU)","vzd_od_slunce_min_(AU)","vzd_od_slunce_max_(AU)",id_tel) VALUES
 (1,null,null,1),(null,0.3075,0.4667,2),(null,0.7184,0.7282,3),(0,0.9833,1.0167,4),(null,1.3813,1.665,6),(null,4.9516,5.4552,9),

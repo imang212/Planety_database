@@ -40,14 +40,28 @@ order by AVG(t1."prumer_(km)") desc
 limit 4
 
 --select s hiearchií SELF_join
-SELECT t3.typ AS "typ planety",
-t3.id_pla as "ID typu planety",
-t1.nazev AS "název", 
-t1.id_tel as "ID planety"
-FROM ("Teleso" t1 JOIN "Typ_telesa" t2 ON t1.id_typ_tel = t2.id_typ) 
-LEFT JOIN "Typy_planet" t3 ON t2.id_pla = t3.id_pla
-WHERE t3.id_pla IS NOT NULL
-ORDER BY t3.id_pla asc
+-- upravit má to být v samý tabulce
+with recursive dedicnost_planet as(
+  select t.id_pla, (SELECT nazev FROM "Teleso" s WHERE s.id_tel = t.id_pla) AS "název planety", t.id_tel, t.nazev 
+  from "Teleso" t 
+  where t.id_pla is not null
+  union 
+  select t.id_pla, (SELECT nazev FROM "Teleso" s WHERE s.id_tel = t.id_pla) AS "název planety", t.id_tel, t.nazev as "název měcíce" 
+  from "Teleso" t 
+  inner join dedicnost_planet d on d.id_pla = t.id_tel
+)
+select * from dedicnost_planet order by id_pla ASC;
+
+with recursive dedicnost_hvezd as(
+  select t.id_mat_hve, (SELECT nazev FROM "Teleso" s WHERE s.id_tel = t.id_mat_hve) AS "název hvězdy", t.id_tel, t.nazev 
+  from "Teleso" t 
+  where id_mat_hve is not null
+  union 
+  select t.id_mat_hve, (SELECT nazev FROM "Teleso" s WHERE s.id_tel = t.id_mat_hve) AS "název hvězdy", t.id_tel, t.nazev 
+  from "Teleso" t 
+  inner join dedicnost_hvezd d on d.id_mat_hve = t.id_tel
+)
+select * from dedicnost_hvezd order by id_tel ASC;
 
 --view
 CREATE OR REPLACE VIEW Telesa_view AS
@@ -72,15 +86,6 @@ WHERE t3.id_pla IS NOT NULL
 ORDER BY t3.id_pla asc
 
 --index1
-explain analyse SELECT t3.typ AS "typ planety",
-t3.id_pla as "ID typu planety",
-t1.nazev AS "název", 
-t1.id_tel as "ID planety"
-FROM ("Teleso" t1 JOIN "Typ_telesa" t2 ON t1.id_typ_tel = t2.id_typ) 
-LEFT JOIN "Typy_planet" t3 ON t2.id_pla = t3.id_pla
-WHERE t3.id_pla IS NOT NULL
-ORDER BY t3.id_pla asc
-
 CREATE index index1 ON "Teleso"("id_typ_tel");
 
 explain analyse SELECT t3.typ AS "typ planety",
@@ -140,8 +145,8 @@ select Vrat_prumernou_hmotnost('planeta');
 
 --- procedura
 -- prodecedura, která nám crací tabulku s gravitací jednotlivých těles
-create or replace function Vrat_gravitaci(min_gravitace numeric, max_gravitace numeric) 
-RETURNS void AS $$
+create or replace procedure Vrat_gravitaci(min_gravitace numeric, max_gravitace numeric) 
+AS $$
 DECLARE
   p_cursor CURSOR FOR SELECT t2.nazev AS typ_planety, t1.nazev, t1."gravitace_(m/s^(2))" AS gravitace 
       FROM "Teleso" t1 LEFT join "Typ_telesa" t2 ON t1.id_typ_tel = t2.id_typ 
@@ -176,9 +181,15 @@ END;
 $$ language plpgsql;
 
 
-select Vrat_gravitaci(0,2); --nejdřív tělesa, která mají gravitaci od 0 do 2 m/S
-select Vrat_gravitaci(20,1000); -- potom tělesa, která mají vyšší gravitaci než 20 m/s
+BEGIN;
+CALL Vrat_gravitaci(0,2); --nejdřív tělesa, která mají gravitaci od 0 do 2 m/S
+ROLLBACK; -- při chybě zavolám rollback
+COMMIT;
 
+BEGIN;
+CALL Vrat_gravitaci(20,1000); -- potom tělesa, která mají vyšší gravitaci než 20 m/s
+ROLLBACK; -- při chybě zavolám rollback
+COMMIT;
 
 
 ---trigger
@@ -283,12 +294,14 @@ GRANT selecting_role TO patricek;
 -- select * from "Teleso"; DELETE FROM "Teleso" WHERE id_tel = 36; INSERT INTO "Teleso" VALUES (36,'Alpha Centauri A',Null, 3, 1.2175*695.700, 1.078*2*POWER(10,30), 1.51 , 42.17, NULL,5.804,NULL,9720, 28.3,NULL,NULL);
 -- psql -U patricek -d postgres
 
-GRANT ALL PRIVILEGES ON TABLE "Teleso","teleso_action" TO selecting_role;
+GRANT select, insert, UPDATE ON TABLE "Teleso","teleso_action" TO selecting_role;
 GRANT USAGE, SELECT ON SEQUENCE teleso_action_id_seq TO selecting_role;
 
 REVOKE ALL PRIVILEGES ON TABLE "Teleso","teleso_action" FROM selecting_role;
-REVOKE ALL PRIVILEGES ON DATABASE postgres FROM patricek;
 REVOKE USAGE, CREATE ON SCHEMA public FROM selecting_role;
+REVOKE USAGE, SELECT ON SEQUENCE teleso_action_id_seq FROM selecting_role;
+REVOKE ALL PRIVILEGES ON DATABASE postgres FROM patricek;
+
 
 DROP user patricek;
 DROP ROLE selecting_role;
