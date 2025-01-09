@@ -85,6 +85,8 @@ select * from dedicnost_hvezd order by id_tel ASC;
 ```
 
 __View__
+
+Přehled o tělesech v databázi.
 ```sql
 CREATE OR REPLACE VIEW Telesa_view AS
 SELECT t1.nazev AS "název tělesa", t1.symbol AS "symbol tělesa", 
