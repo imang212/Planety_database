@@ -68,8 +68,22 @@ with recursive dedicnost_planet as(
   inner join dedicnost_planet d on d.id_pla = t.id_tel
 )
 select * from dedicnost_planet order by id_pla ASC;
+```
+Rekurzivní SELECT, kde každá hvězda má svoje těleso.
+```sql
+with recursive dedicnost_hvezd as(
+  select t.id_mat_hve, (SELECT nazev FROM "Teleso" s WHERE s.id_tel = t.id_mat_hve) AS "název hvězdy", t.id_tel, t.nazev 
+  from "Teleso" t 
+  where id_mat_hve is not null
+  union 
+  select t.id_mat_hve, (SELECT nazev FROM "Teleso" s WHERE s.id_tel = t.id_mat_hve) AS "název hvězdy", t.id_tel, t.nazev 
+  from "Teleso" t 
+  inner join dedicnost_hvezd d on d.id_mat_hve = t.id_tel
+)
+select * from dedicnost_hvezd order by id_tel ASC;
 
 ```
+
 __View__
 ```sql
 CREATE OR REPLACE VIEW Telesa_view AS
