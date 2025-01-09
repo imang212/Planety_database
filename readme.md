@@ -55,17 +55,21 @@ order by AVG(t1."prumer_(km)") desc
 limit 4
 ```
 __SELECT s hiearchií SELF_JOIN__
+
+Zde jsem udělal rekurzivní SELECT, kde každá planeta má přizazený svůj měsíc nebo měsíce.
 ```sql
 with recursive dedicnost_planet as(
-  select t.id_pla, t.id_tel, t.nazev 
+  select t.id_pla, (SELECT nazev FROM "Teleso" s WHERE s.id_tel = t.id_pla) AS "název planety", t.id_tel, t.nazev 
   from "Teleso" t 
-  where id_pla is not null
+  where t.id_pla is not null
   union 
-  select t.id_pla, t.id_tel, t.nazev 
+  select t.id_pla, (SELECT nazev FROM "Teleso" s WHERE s.id_tel = t.id_pla) AS "název planety", t.id_tel, t.nazev as "název měcíce" 
   from "Teleso" t 
   inner join dedicnost_planet d on d.id_pla = t.id_tel
+  where t.id_pla is not null
 )
 select * from dedicnost_planet order by id_pla ASC;
+
 ```
 __View__
 ```sql
