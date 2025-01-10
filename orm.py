@@ -29,6 +29,7 @@ class Teleso(Base):
 class Teleso_action(Base):
     __tablename__ = 'teleso_action'
     __table_args__ = {"schema": "public"}
+
     id = Column(Integer, primary_key=True, autoincrement=True)
     id_obj = Column(Integer, nullable=False,name="id_tel")
     name = Column(String(25), nullable=False, name="nazev")
@@ -47,14 +48,19 @@ def create_tables(engine):
     Base.metadata.create_all(engine)
     print('Tables created')
 
+#vytvoření session
+def create_session(engine):
+    global session
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
 def Count_objects():
     try:
         objects = session.query(Teleso).all()
     finally:
         session.close()
         return len(objects)
-
-
+    
 def Insert_object(name, symbol, id_type_obj, mean, mass, density, gravity, min_t, mean_t, max_t, rotation, period, id_mother_star, id_mother_planet, user):
     try:
         teleso = Teleso(id=Count_objects()+1, name=name, symbol=symbol, id_type_obj=id_type_obj, mean=mean, mass=mass, density=density, 
@@ -73,7 +79,6 @@ def Insert_object(name, symbol, id_type_obj, mean, mass, density, gravity, min_t
     finally:
         session.close()
 
-
 def Show_objects():
     try:
         objects = session.query(Teleso).all()
@@ -81,7 +86,6 @@ def Show_objects():
             print(f"Object: {object.name}, Mean: {round(object.mean,0)} km")
     finally:
         session.close()
-
 
 def Mean_change(name1, name2, count, user):
     try:
@@ -109,16 +113,16 @@ def Mean_change(name1, name2, count, user):
         session.close()
 
 # Příklad použití
-Connection('patricek','patrik123456')
+Connection('postgres','patrik123')
 create_tables(engine)
+create_session(engine)
 
-Session = sessionmaker(bind=engine)
-session = Session()
-
+#výpis těles a jejich průměrů
 print(Show_objects())
-
+#vložení objektu do databáze
 #Insert_object(name='Mars2', symbol=None, id_type_obj=9, mean=6792.4, mass=6.4185*pow(10,23), density=3.933, gravity=3.69, min_t=130, mean_t=210, max_t=308, rotation=868.22, period=1.026, id_mother_star=1, id_mother_planet=None, user='patricek')
 #print(Show_objects())
+#převod průměru
 #Mean_change('Jupiter', 'Merkur', 100000, 'patricek')
 #print(Show_objects())
 #Mean_change('Merkur', 'Jupiter', 100000, 'patricek')
