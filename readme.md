@@ -11,7 +11,7 @@ __Načtení databáze__
 Databázi si můžeme načíst pomocí nahraného souboru **"planety_postgre.sql**". Stačí zkopírovat kód do Postgresql databáze, spustit ho jako celek a potom by se měla objevit ve Vaší databázi. Tento kód funguje pouze pro postgresql databázi.   
 
 ### Příkazy
-A teď se pojďme podívat na příkazy, které jsem udělal v rámci seminární práce na předmět RDBS(Relační databázové systémy). Jsou také uloženy v souboru **"planety_prikazy_postgre.sql**"
+A teď se pojďme podívat na příkazy, které jsem udělal v rámci seminární práce na předmět RDBS(Relační databázové systémy). Jsou uloženy v souboru **"planety_prikazy_postgre.sql**"
 
 __SELECT pro výpočet průměrné počtu záznamů na tabulku__
 ```sql
