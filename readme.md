@@ -341,6 +341,7 @@ DROP user patricek;
 DROP ROLE selecting_role;
 ```
 __Lock__
+
 Zamknu si tabulku při třeba nějaké práci, aby s ní nikdo nemohl vykonávat další věci. Například do share módu.
 ```sql
 BEGIN WORK;
