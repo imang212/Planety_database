@@ -311,23 +311,23 @@ __User__
 
 Zde mám píklad vytvoření uživatele.
 ```sql
-CREATE USER patricek WITH PASSWORD 'patrik123456';
+CREATE USER patrik WITH PASSWORD 'patrik123456';
 ```
 Přidělení práva uživateli, aby se mohl připojit.
 ```sql
-GRANT CONNECT ON DATABASE postgres TO patricek;
+GRANT CONNECT ON DATABASE postgres TO patrik;
 ```
 Vytvoření role.
 ```sql
 CREATE ROLE selecting_role WITH LOGIN PASSWORD 'heslo';
 
 GRANT USAGE, CREATE ON SCHEMA public TO selecting_role;
---GRANT SELECT ON TABLE "Planety" TO Patricek;
+--GRANT SELECT ON TABLE "Planety" TO patrik;
 GRANT SELECT ON TABLE "Teleso" TO selecting_role;
 ```
 Přidělení role uživateli.
 ```sql
-GRANT selecting_role TO patricek;
+GRANT selecting_role TO patrik;
 ```
 Přidělování práv.
 ```sql
@@ -339,11 +339,11 @@ Odebírání práv.
 REVOKE ALL PRIVILEGES ON TABLE "Teleso","teleso_action" FROM selecting_role;
 REVOKE USAGE, CREATE ON SCHEMA public FROM selecting_role;
 REVOKE USAGE, SELECT ON SEQUENCE teleso_action_id_seq FROM selecting_role;
-REVOKE ALL PRIVILEGES ON DATABASE postgres FROM patricek;
+REVOKE ALL PRIVILEGES ON DATABASE postgres FROM patrik;
 ```
 Smazání uživatele a role.
 ```sql
-DROP USER patricek;
+DROP USER patrik;
 DROP ROLE selecting_role;
 ```
 __Lock__
