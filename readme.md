@@ -158,7 +158,7 @@ SELECT Vrat_prumernou_hmotnost('planeta');
 
 __Procedura__
 
-Zde mám proceduru, která nám vrátí tabulku s názvy a gravitací jednotlivých těles.
+Zde mám proceduru, která nám vrátí tabulku s typy, názvy a gravitací jednotlivých těles.
 ```sql
 CREATE OR REPLACE PROCEDURE Vrat_gravitaci(min_gravitace numeric, max_gravitace numeric) 
 AS $$
