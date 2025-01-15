@@ -40,7 +40,8 @@ FROM (
 ```
 __SELECT s vnořeným selectem__
 ```sql
-select nazev as "Název tělesa", 1 + (select count(*) from "Teleso" where "hmotnost_(kg)" > t."hmotnost_(kg)") as "Pořadí největší hmotnosti" 
+select nazev as "Název tělesa",
+1 + (select count(*) from "Teleso" where "hmotnost_(kg)" > t."hmotnost_(kg)") as "Pořadí největší hmotnosti" 
 from "Teleso" t
 order by "Pořadí největší hmotnosti";
 ```
@@ -59,11 +60,13 @@ __SELECT s hiearchií SELF_JOIN__
 Zde jsem udělal rekurzivní SELECT, kde každá planeta má přizazený svůj měsíc nebo měsíce.
 ```sql
 with recursive dedicnost_planet as(
-  select t.id_pla, (SELECT nazev FROM "Teleso" s WHERE s.id_tel = t.id_pla) AS "název planety", t.id_tel, t.nazev 
+  select t.id_pla, (SELECT nazev FROM "Teleso" s WHERE s.id_tel = t.id_pla) AS "název planety",
+  t.id_tel, t.nazev 
   from "Teleso" t 
   where t.id_pla is not null
   union 
-  select t.id_pla, (SELECT nazev FROM "Teleso" s WHERE s.id_tel = t.id_pla) AS "název planety", t.id_tel, t.nazev as "název měcíce" 
+  select t.id_pla, (SELECT nazev FROM "Teleso" s WHERE s.id_tel = t.id_pla) AS "název planety",
+  t.id_tel, t.nazev as "název měcíce" 
   from "Teleso" t 
   inner join dedicnost_planet d on d.id_pla = t.id_tel
 )
@@ -72,11 +75,13 @@ select * from dedicnost_planet order by id_pla ASC;
 Rekurzivní SELECT, kde každá hvězda má svoje těleso.
 ```sql
 with recursive dedicnost_hvezd as(
-  select t.id_mat_hve, (SELECT nazev FROM "Teleso" s WHERE s.id_tel = t.id_mat_hve) AS "název hvězdy", t.id_tel, t.nazev 
+  select t.id_mat_hve, (SELECT nazev FROM "Teleso" s WHERE s.id_tel = t.id_mat_hve) AS "název hvězdy",
+  t.id_tel, t.nazev 
   from "Teleso" t 
   where id_mat_hve is not null
   union 
-  select t.id_mat_hve, (SELECT nazev FROM "Teleso" s WHERE s.id_tel = t.id_mat_hve) AS "název hvězdy", t.id_tel, t.nazev 
+  select t.id_mat_hve, (SELECT nazev FROM "Teleso" s WHERE s.id_tel = t.id_mat_hve) AS "název hvězdy",
+  t.id_tel, t.nazev 
   from "Teleso" t 
   inner join dedicnost_hvezd d on d.id_mat_hve = t.id_tel
 )
@@ -223,7 +228,8 @@ Teďka si nadefinuji funkci, kterou bude používat trigger.
 CREATE OR REPLACE FUNCTION teleso_insert()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO Teleso_action(id_tel,nazev,datum,akce,user_) VALUES (NEW.id_tel,NEW.nazev,CURRENT_TIMESTAMP,'INSERT',SESSION_USER);
+  INSERT INTO Teleso_action(id_tel,nazev,datum,akce,user_)
+  VALUES (NEW.id_tel,NEW.nazev,CURRENT_TIMESTAMP,'INSERT',SESSION_USER);
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
