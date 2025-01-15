@@ -40,50 +40,50 @@ FROM (
 ```
 __SELECT s vnořeným selectem__
 ```sql
-select nazev as "Název tělesa",
-1 + (select count(*) from "Teleso" where "hmotnost_(kg)" > t."hmotnost_(kg)") as "Pořadí největší hmotnosti" 
-from "Teleso" t
-order by "Pořadí největší hmotnosti";
+SELECT nazev AS "Název tělesa",
+1 + (SELECT count(*) FROM "Teleso" WHERE "hmotnost_(kg)" > t."hmotnost_(kg)") AS "Pořadí největší hmotnosti" 
+FROM "Teleso" t
+ORDER BY "Pořadí největší hmotnosti";
 ```
 __SELECT s analytickou funkcí__
 ```sql
-select t3.typ AS "Druh tělesa", CONCAT(ROUND(AVG(t1."prumer_(km)")::numeric,0),' ','km') AS "Průměrný průměr těles"
+SELECT t3.typ AS "Druh tělesa", CONCAT(ROUND(AVG(t1."prumer_(km)")::numeric,0),' ','km') AS "Průměrný průměr těles"
 FROM ("Teleso" t1 JOIN "Typ_telesa" t2 ON t1.id_typ_tel = t2.id_typ) 
 LEFT JOIN "Typy_planet" t3 ON t2.id_pla = t3.id_pla
 WHERE t2.id_pla IS NOT NULL
-group by t3.typ 
-order by AVG(t1."prumer_(km)") desc
-limit 4
+GROUP BY t3.typ 
+ORDER BY AVG(t1."prumer_(km)") desc
+LIMIT 4
 ```
 __SELECT s hiearchií SELF_JOIN__
 
 Zde jsem udělal rekurzivní SELECT, kde každá planeta má přizazený svůj měsíc nebo měsíce.
 ```sql
 with recursive dedicnost_planet as(
-  select t.id_pla, (SELECT nazev FROM "Teleso" s WHERE s.id_tel = t.id_pla) AS "název planety",
+  SELECT t.id_pla, (SELECT nazev FROM "Teleso" s WHERE s.id_tel = t.id_pla) AS "název planety",
   t.id_tel, t.nazev 
-  from "Teleso" t 
-  where t.id_pla is not null
-  union 
-  select t.id_pla, (SELECT nazev FROM "Teleso" s WHERE s.id_tel = t.id_pla) AS "název planety",
+  FROM "Teleso" t 
+  WHERE t.id_pla is not null
+  UNION 
+  SELECT t.id_pla, (SELECT nazev FROM "Teleso" s WHERE s.id_tel = t.id_pla) AS "název planety",
   t.id_tel, t.nazev as "název měcíce" 
-  from "Teleso" t 
-  inner join dedicnost_planet d on d.id_pla = t.id_tel
+  FROM "Teleso" t 
+  INNER JOIN dedicnost_planet d ON d.id_pla = t.id_tel
 )
 select * from dedicnost_planet order by id_pla ASC;
 ```
 Rekurzivní SELECT, kde každá hvězda má svoje těleso.
 ```sql
 with recursive dedicnost_hvezd as(
+  SELECT t.id_mat_hve, (SELECT nazev FROM "Teleso" s WHERE s.id_tel = t.id_mat_hve) AS "název hvězdy",
+  t.id_tel, t.nazev 
+  FROM "Teleso" t 
+  WHERE id_mat_hve is not null
+  UNION 
   select t.id_mat_hve, (SELECT nazev FROM "Teleso" s WHERE s.id_tel = t.id_mat_hve) AS "název hvězdy",
   t.id_tel, t.nazev 
-  from "Teleso" t 
-  where id_mat_hve is not null
-  union 
-  select t.id_mat_hve, (SELECT nazev FROM "Teleso" s WHERE s.id_tel = t.id_mat_hve) AS "název hvězdy",
-  t.id_tel, t.nazev 
-  from "Teleso" t 
-  inner join dedicnost_hvezd d on d.id_mat_hve = t.id_tel
+  FROM "Teleso" t 
+  INNER JOIN dedicnost_hvezd d ON d.id_mat_hve = t.id_tel
 )
 select * from dedicnost_hvezd order by id_tel ASC;
 
@@ -109,24 +109,24 @@ __INDEX__
 Nejdříve změřím normální čas potřebný pro daný select pomocí příkazu explain analyse.
 ```sql
 explain analyse SELECT t3.typ AS "typ planety",
-t3.id_pla as "ID typu planety",
+t3.id_pla AS "ID typu planety",
 t1.nazev AS "název", 
-t1.id_tel as "ID planety"
+t1.id_tel AS "ID planety"
 FROM ("Teleso" t1 JOIN "Typ_telesa" t2 ON t1.id_typ_tel = t2.id_typ) 
 LEFT JOIN "Typy_planet" t3 ON t2.id_pla = t3.id_pla
 WHERE t3.id_pla IS NOT NULL
-ORDER BY t3.id_pla asc
+ORDER BY t3.id_pla ASC
 ```
 Vytvořím si první index na id typu tělesa v tabulce Teleso, aby se mezi nimi dalo ryhleji prohledávat.
 ```sql
-CREATE index index1 ON "Teleso"("id_typ_tel");
+CREATE INDEX index1 ON "Teleso"("id_typ_tel");
 ```
 Potom zase zkontroluji čas příkazu a můžu vidět, že příkaz se provedl rychleji.
 ```sql
 explain analyse SELECT t3.typ AS "typ planety",
-t3.id_pla as "ID typu planety",
+t3.id_pla AS "ID typu planety",
 t1.nazev AS "název", 
-t1.id_tel as "ID planety"
+t1.id_tel AS "ID planety"
 FROM ("Teleso" t1 JOIN "Typ_telesa" t2 ON t1.id_typ_tel = t2.id_typ) 
 LEFT JOIN "Typy_planet" t3 ON t2.id_pla = t3.id_pla
 WHERE t3.id_pla IS NOT NULL
@@ -134,13 +134,13 @@ ORDER BY t3.id_pla asc
 ```
 Dalá si udělám index na dva sloupce u tabulky Typ_telesa
 ```sql
-create index index2 ON "Typ_telesa"("id_typ","id_pla");
+CREATE INDEX index2 ON "Typ_telesa"("id_typ","id_pla");
 ```
 A zase se nám příkaz o něco zrychlil.
 
 __Funkce vracející průměrnou hmotnost těles podle jejich druhu(skupiny)__
 ```sql
-create or replace function Vrat_prumernou_hmotnost(druh_telesa text)
+CREATE OR REPLACE FUNCTION Vrat_prumernou_hmotnost(druh_telesa text)
   returns Table(hmotnost text) AS $$
     select concat(AVG(t1."hmotnost_(kg)"::real),' kg') as "Průměrná hmotnost" 
     from "Teleso" t1 join "Typ_telesa" t2 ON t1.id_typ_tel = t2.id_typ 
@@ -149,18 +149,18 @@ $$ language sql;
 ```
 Nyní si funkci vyzkouším měsíce
 ```sql
-select Vrat_prumernou_hmotnost('měsíc');
+SELECT Vrat_prumernou_hmotnost('měsíc');
 ```
 A ještě na normální planety
 ```sql
-select Vrat_prumernou_hmotnost('planeta');
+SELECT Vrat_prumernou_hmotnost('planeta');
 ```
 
 __Procedura__
 
 Zde mám proceduru, která nám vrátí tabulku s typy, názvy a gravitací jednotlivých těles.
 ```sql
-create or replace procedure Vrat_gravitaci(min_gravitace numeric, max_gravitace numeric) 
+CREATE OR REPLACE PROCEDURE Vrat_gravitaci(min_gravitace numeric, max_gravitace numeric) 
 AS $$
 DECLARE
   p_cursor CURSOR FOR SELECT t2.nazev AS typ_planety, t1.nazev, t1."gravitace_(m/s^(2))" AS gravitace 
@@ -331,7 +331,7 @@ GRANT selecting_role TO patricek;
 ```
 Přidělování práv.
 ```sql
-GRANT select, insert, UPDATE ON TABLE "Teleso","teleso_action" TO selecting_role;
+GRANT SELECT, INSERT, UPDATE ON TABLE "Teleso","teleso_action" TO selecting_role;
 GRANT USAGE, SELECT ON SEQUENCE teleso_action_id_seq TO selecting_role;
 ```
 Odebírání práv.
@@ -343,7 +343,7 @@ REVOKE ALL PRIVILEGES ON DATABASE postgres FROM patricek;
 ```
 Smazání uživatele a role.
 ```sql
-DROP user patricek;
+DROP USER patricek;
 DROP ROLE selecting_role;
 ```
 __Lock__
