@@ -209,7 +209,7 @@ COMMIT;
 ```
 __Trigger__
 
-Abych mohl udělat trigger, tak nejsříve musím mít tabulku pro ukládání záznamů.
+Abych mohl udělat trigger, tak nejdříve musím mít tabulku pro ukládání záznamů.
 ```sql
 DROP TABLE IF EXISTS teleso_action;
 CREATE TABLE teleso_action(
@@ -250,7 +250,7 @@ DELETE FROM "Teleso" WHERE id_tel = 36;
 ```
 __Transakce__
 
-Transakce, která změní odečte průměr z jedné planety a přičte ho ke druhé
+Transakce, která změní odečte průměr z jedné planety a přičte ho ke druhé.
 ```sql
 CREATE OR REPLACE PROCEDURE zmen_prumer_planety(nazev1 VARCHAR, nazev2 VARCHAR, o_kolik NUMERIC)
 AS $$
@@ -258,7 +258,7 @@ DECLARE
   aktualni_prumer NUMERIC; --uložím si průměr tělesa do proměnné
 BEGIN -- začnu transakci
   -- vezmu si průměr tělesa  z kterýho ho budu brát
-    SELECT "prumer_(km)" INTO aktualni_prumer 
+  SELECT "prumer_(km)" INTO aktualni_prumer 
   FROM "Teleso" 
   WHERE nazev = nazev1;
     
@@ -269,17 +269,17 @@ BEGIN -- začnu transakci
     END IF;
   
   --odečteme prumer
-    UPDATE "Teleso"
-    SET "prumer_(km)" = "prumer_(km)" - o_kolik
-    WHERE nazev = nazev1;
+  UPDATE "Teleso"
+  SET "prumer_(km)" = "prumer_(km)" - o_kolik
+  WHERE nazev = nazev1;
   
-    --přičteme prumer
-    UPDATE "Teleso"
-    SET "prumer_(km)" = "prumer_(km)" + o_kolik
-    WHERE nazev = nazev2;
+  --přičteme prumer
+  UPDATE "Teleso"
+  SET "prumer_(km)" = "prumer_(km)" + o_kolik
+  WHERE nazev = nazev2;
   
 
-  -- vypíšu poznámku, že transakce byla dokonřená
+  -- vypíšu poznámku, že převod proběhl v pořádku
   RAISE NOTICE 'Převod průměru byl dokončen.';
 -- když nastane nějaká chyba vyvolám výjimku a transakci vrátím nazpátek
 EXCEPTION WHEN OTHERS THEN
@@ -313,7 +313,7 @@ Zde mám píklad vytvoření uživatele.
 ```sql
 CREATE USER patricek WITH PASSWORD 'patrik123456';
 ```
-Přidělení práva uživateli, aby se mohl pžipojit.
+Přidělení práva uživateli, aby se mohl připojit.
 ```sql
 GRANT CONNECT ON DATABASE postgres TO patricek;
 ```
@@ -348,12 +348,11 @@ DROP ROLE selecting_role;
 ```
 __Lock__
 
-Zamknu si tabulku při třeba nějaké práci, aby s ní nikdo nemohl vykonávat další věci. Například do share módu.
+Zamknu si tabulku do nějakého módu třeba při nějaké práci, abych mohl vrátit všechny operace s tabulkou, které proběhly v daném úseku nazpátek.
 ```sql
 BEGIN WORK;
 LOCK TABLE "Teleso" IN SHARE MODE; --zamknu tabulku, když jdu dělat konkrétní operaci
-SELECT * FROM "Teleso" WHERE id_tel = 1 FOR SHARE;
-SELECT * FROM "Teleso" WHERE id_tel = 1 for update;
+SELECT * FROM "Teleso" WHERE id_tel = 1;
 ROLLBACK;
 COMMIT WORK;
 UPDATE "Teleso" SET "prumer_(km)" = "prumer_(km)" - 100000 WHERE id_tel = 1;
@@ -362,8 +361,7 @@ Zamknu tabulku do exclusive access modu
 ```sql
 BEGIN WORK;
 LOCK TABLE "Teleso" in ACCESS EXCLUSIVE MODE;
-SELECT * FROM "Teleso" WHERE id_tel = 1 FOR SHARE;
-SELECT * FROM "Teleso" WHERE id_tel = 1 for update;
+SELECT * FROM "Teleso" WHERE id_tel = 1;
 UPDATE "Teleso" SET "prumer_(km)" = "prumer_(km)" + 100000 WHERE id_tel = 1;
 ROLLBACK;
 COMMIT WORK;
