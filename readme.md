@@ -47,45 +47,45 @@ ORDER BY "Pořadí největší hmotnosti";
 ```
 __SELECT s analytickou funkcí__
 ```sql
-SELECT t3.typ AS "Druh tělesa", CONCAT(ROUND(AVG(t1."prumer_(km)")::numeric,0),' ','km') AS "Průměrný průměr těles"
+SELECT t3.typ AS "Druh tělesa", CONCAT(ROUND(AVG(t1."prumer_(km)")::NUMERIC,0),' ','km') AS "Průměrný průměr těles"
 FROM ("Teleso" t1 JOIN "Typ_telesa" t2 ON t1.id_typ_tel = t2.id_typ) 
 LEFT JOIN "Typy_planet" t3 ON t2.id_pla = t3.id_pla
 WHERE t2.id_pla IS NOT NULL
 GROUP BY t3.typ 
-ORDER BY AVG(t1."prumer_(km)") desc
+ORDER BY AVG(t1."prumer_(km)") DESC
 LIMIT 4
 ```
 __SELECT s hiearchií SELF_JOIN__
 
 Zde jsem udělal rekurzivní SELECT, kde každá planeta má přizazený svůj měsíc nebo měsíce.
 ```sql
-with recursive dedicnost_planet as(
+with recursive dedicnost_planet AS(
   SELECT t.id_pla, (SELECT nazev FROM "Teleso" s WHERE s.id_tel = t.id_pla) AS "název planety",
   t.id_tel, t.nazev 
   FROM "Teleso" t 
-  WHERE t.id_pla is not null
+  WHERE t.id_pla IS NOT NULL
   UNION 
   SELECT t.id_pla, (SELECT nazev FROM "Teleso" s WHERE s.id_tel = t.id_pla) AS "název planety",
   t.id_tel, t.nazev as "název měcíce" 
   FROM "Teleso" t 
   INNER JOIN dedicnost_planet d ON d.id_pla = t.id_tel
 )
-select * from dedicnost_planet order by id_pla ASC;
+SELECT * FROM dedicnost_planet ORDER BY id_pla ASC;
 ```
 Rekurzivní SELECT, kde každá hvězda má svoje těleso.
 ```sql
-with recursive dedicnost_hvezd as(
+with recursive dedicnost_hvezd AS(
   SELECT t.id_mat_hve, (SELECT nazev FROM "Teleso" s WHERE s.id_tel = t.id_mat_hve) AS "název hvězdy",
   t.id_tel, t.nazev 
   FROM "Teleso" t 
-  WHERE id_mat_hve is not null
+  WHERE id_mat_hve IS NOT NULL
   UNION 
   select t.id_mat_hve, (SELECT nazev FROM "Teleso" s WHERE s.id_tel = t.id_mat_hve) AS "název hvězdy",
   t.id_tel, t.nazev 
   FROM "Teleso" t 
   INNER JOIN dedicnost_hvezd d ON d.id_mat_hve = t.id_tel
 )
-select * from dedicnost_hvezd order by id_tel ASC;
+SELECT * FROM dedicnost_hvezd ORDER BY id_tel ASC;
 
 ```
 
