@@ -61,12 +61,12 @@ Zde jsem udělal rekurzivní SELECT, kde každá planeta má přizazený svůj m
 ```sql
 with recursive dedicnost_planet AS(
   SELECT t.id_pla, (SELECT nazev FROM "Teleso" s WHERE s.id_tel = t.id_pla) AS "název planety",
-  t.id_tel, t.nazev 
+  t.id_tel, t.nazev as "název měsíce"
   FROM "Teleso" t 
   WHERE t.id_pla IS NOT NULL
   UNION 
   SELECT t.id_pla, (SELECT nazev FROM "Teleso" s WHERE s.id_tel = t.id_pla) AS "název planety",
-  t.id_tel, t.nazev as "název měcíce" 
+  t.id_tel, t.nazev as "název měsíce" 
   FROM "Teleso" t 
   INNER JOIN dedicnost_planet d ON d.id_pla = t.id_tel
 )
