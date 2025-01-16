@@ -291,14 +291,29 @@ $$ LANGUAGE plpgsql;
 Teď to vyzkouším.
 ```sql
 SELECT id_tel, nazev, concat(ROUND("prumer_(km)"::numeric,0),' km') FROM "Teleso" WHERE nazev IN ('Jupiter','Merkur');
+```
+Následující transakce si spouštím pouze po řádcích.
 
+Začnu transakci pomocí BEGIN
+```sql
 BEGIN;
+```
+Zavolám transakci nebo víc transakcí pomocí CALL
+```sql
 CALL zmen_prumer_planety('Jupiter','Merkur',100000);
+```
+Když si to rozmslím, tak transakci mohu vrátit nazpátek pomocí ROLLBACK.
+```sql
 ROLLBACK; -- při chybě zavolám rollback
+```
+Pomocí COMMIT transakci dokončím.
+```sql
 COMMIT;
-
+```
+Teď si tu transakci ověřím, tak že si vypíšu průměr převáděných těles,
+```sql
 SELECT id_tel, nazev, concat(ROUND("prumer_(km)"::numeric,0),' km') FROM "Teleso" WHERE nazev IN ('Jupiter','Merkur');
-
+```
 BEGIN;
 CALL zmen_prumer_planety('Merkur','Jupiter',100000);
 ROLLBACK;
