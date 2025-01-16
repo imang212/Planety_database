@@ -310,17 +310,18 @@ Pomocí COMMIT transakci dokončím.
 ```sql
 COMMIT;
 ```
-Teď si tu transakci ověřím, tak že si vypíšu průměr převáděných těles,
+Teď si tu transakci ověřím, tak že si vypíšu průměr převáděných těles.
 ```sql
 SELECT id_tel, nazev, concat(ROUND("prumer_(km)"::numeric,0),' km') FROM "Teleso" WHERE nazev IN ('Jupiter','Merkur');
 ```
+Obrácená transakce.
+```sql
 BEGIN;
 CALL zmen_prumer_planety('Merkur','Jupiter',100000);
 ROLLBACK;
 COMMIT;
-
+```
 SELECT id_tel, nazev, concat(ROUND("prumer_(km)"::numeric,0),' km') FROM "Teleso" WHERE nazev IN ('Jupiter','Merkur');
-
 ```
 __User__
 
